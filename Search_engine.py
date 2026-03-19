@@ -9,9 +9,13 @@ stop_words.update('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm
 
 ALNUM_RE = re.compile(r'[^a-z0-9]+')
 
-items = listdir('/Users/rino/')
-for item in items:
-    print(item + '\n')
+base_dir = '/Users/rino/Downloads/'
+
+items = listdir(base_dir)
+#print(items)
+items = [item for item in items if item.split('.')[-1] == 'txt']
+"""for item in items:
+    print(item + '\n')"""
 
 class VectorCompare:
     def concordance(self, document):
@@ -52,7 +56,7 @@ class VectorCompare:
 
 v = VectorCompare()
 
-doc1_path = '/Users/rino/Downloads/The Reconstruction of Black Servitude (2).txt'
+"""doc1_path = '/Users/rino/Downloads/The Reconstruction of Black Servitude (2).txt'
 doc2_path = '/Users/rino/Downloads/02WBAI Ch2.txt'
 with open(doc1_path, 'r', encoding='utf-8') as f:
     doc1_content = f.read()
@@ -64,30 +68,60 @@ with open(doc2_path, 'r', encoding='utf-8') as f:
     doc2_content = re.sub(ALNUM_RE, " ", doc2_content)
 
 word_content_dict = {doc1_path:doc1_content, doc2_path:doc2_content}
-
 word_count_path1 = v.concordance(doc1_path)
 word_count_content1 = v.concordance(doc1_content)
 word_count_path2 = v.concordance(doc2_path)
 word_count_content2 = v.concordance(doc2_content)
-documents = [doc1_path, doc1_content, doc2_path, doc2_content]
-index = {doc_id: v.concordance(text) for doc_id, text in enumerate(documents)}
-#print("Word Count for Document Path:", word_count_path1)
-#print("\nWord Count for Document content: ", word_count_content1)
-#print("Word Count for Document Path:", word_count_path2)
-#print("\nWord Count for Document content: ", word_count_content2)
-top_words = sorted(word_count_content1.items(), key=lambda x: x[1], reverse=True)[:10]
-#print(top_words)
+documents = [doc1_path, doc1_content, doc2_path, doc2_content]"""
+word_content_dict = {}
+documents = []
+#print(items[:5])
+for item in items:
+    """if item.split('.')[-1] != 'txt':
+        continue
+    else:"""
+    try:
+        with open(base_dir + item, 'r', encoding='utf-8') as f:
+            print(item)
+            doc_content = f.read()
+            doc_content = doc_content.lower()
+            doc_content = re.sub(ALNUM_RE, " ", doc_content)
+            doc_content = re.sub(r'(\d+)', r' \1 ', doc_content)
 
+            file_name = item.lower()
+            file_name = re.sub(r'(\d+)', r' \1 ', file_name)
+            clean_file_name = re.sub(ALNUM_RE, " ", file_name)
+            weighted_file_name = (clean_file_name + " ") * 15
+
+            combined_text = weighted_file_name + doc_content
+        word_content_dict[base_dir + item] = combined_text
+        documents.append(base_dir + item)
+        documents.append(doc_content)
+    except Exception as e:
+        print(e)
+index = {doc_path: v.concordance(doc_content) for doc_id, (doc_path, doc_content) in enumerate(word_content_dict.items())}
+#index.update({doc_path: v.concordance(doc_path) for doc_id, (doc_path, doc_content) in enumerate(word_content_dict.items())})
+#top_words = sorted(word_count_content1.items(), key=lambda x: x[1], reverse=True)[:10]
 search_term = input('Enter Search term: ')
 matches = []
 
-for i in range(len(index)):
-    relation = v.relation(v.concordance(search_term.lower()), index[i])
+for doc_name, concordance in index.items():
+    relation = v.relation(v.concordance(search_term.lower()), concordance)
     if relation != 0:
-        match = [doc_name.split('/')[-1] for doc_name, doc_content in word_content_dict.items() if doc_content == documents[i]]
-        print(match)
+        #print(documents[i])
+        #match = [doc_name.split('/')[-1] for doc_name, doc_content in word_content_dict.items() if doc_content == documents[i]]
+        #print(match)
+        match = doc_name.split('/')[-1]
         matches.append((relation, match))
 
 matches.sort(reverse=True)
 
 print("Matches: ", matches)
+
+
+
+#print("DEBUG DEBUG DEBUG")
+#print("DOCUMENTS: ", documents)
+#print("WORD_CONTENT_DICT: ", word_content_dict)
+#print("INDEX", index)
+#print("ITEMS", items)
