@@ -1,14 +1,20 @@
 import re
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 import math
+from os import listdir
+import pprint
 
 stop_words = set(ENGLISH_STOP_WORDS)
 stop_words.update('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
 
 ALNUM_RE = re.compile(r'[^a-z0-9]+')
 
+items = listdir('/Users/rino/')
+for item in items:
+    print(item + '\n')
+
 class VectorCompare:
-    def concordance(document):
+    def concordance(self, document):
         if type(document) != str:
             raise ValueError('Supplied Argument should be of type String')
         con = {}
@@ -25,7 +31,7 @@ class VectorCompare:
         if type(concordance) != dict:
             raise ValueError('Supplied Argument must be of type dict')
         total = 0
-        for word, count in iter(concordance):
+        for word, count in concordance.items():
             total += count ** 2
         return math.sqrt(total)
     
@@ -34,8 +40,14 @@ class VectorCompare:
             raise ValueError('Supplied Argument 1 should be of type dict')
         if type(concordance2) != dict:
             raise ValueError('Supplied Argument should be of type dict')
-        relevance = 0
         topvalue = 0
+        for word, count in concordance1.items():
+            if word in concordance2:
+                topvalue += count * concordance2[word]
+        if (self.magnitude(concordance1) * self.magnitude(concordance2)) != 0:
+            return topvalue / (self.magnitude(concordance1) * self.magnitude(concordance2))
+        else:
+                return 0
 
 
 v = VectorCompare()
@@ -50,14 +62,32 @@ with open(doc2_path, 'r', encoding='utf-8') as f:
     doc2_content = f.read()
     doc2_content = doc2_content.lower()
     doc2_content = re.sub(ALNUM_RE, " ", doc2_content)
-word_count_path1 = concordance(doc1_path)
-word_count_content1 = concordance(doc1_content)
-word_count_path2 = concordance(doc2_path)
-word_count_content2 = concordance(doc2_content)
+
+word_content_dict = {doc1_path:doc1_content, doc2_path:doc2_content}
+
+word_count_path1 = v.concordance(doc1_path)
+word_count_content1 = v.concordance(doc1_content)
+word_count_path2 = v.concordance(doc2_path)
+word_count_content2 = v.concordance(doc2_content)
+documents = [doc1_path, doc1_content, doc2_path, doc2_content]
+index = {doc_id: v.concordance(text) for doc_id, text in enumerate(documents)}
 #print("Word Count for Document Path:", word_count_path1)
 #print("\nWord Count for Document content: ", word_count_content1)
-print("Word Count for Document Path:", word_count_path2)
-print("\nWord Count for Document content: ", word_count_content2)
+#print("Word Count for Document Path:", word_count_path2)
+#print("\nWord Count for Document content: ", word_count_content2)
 top_words = sorted(word_count_content1.items(), key=lambda x: x[1], reverse=True)[:10]
-print(top_words)
+#print(top_words)
 
+search_term = input('Enter Search term: ')
+matches = []
+
+for i in range(len(index)):
+    relation = v.relation(v.concordance(search_term.lower()), index[i])
+    if relation != 0:
+        match = [doc_name.split('/')[-1] for doc_name, doc_content in word_content_dict.items() if doc_content == documents[i]]
+        print(match)
+        matches.append((relation, match))
+
+matches.sort(reverse=True)
+
+print("Matches: ", matches)
