@@ -104,9 +104,10 @@ index = {doc_path: v.concordance(doc_content) for doc_id, (doc_path, doc_content
 #top_words = sorted(word_count_content1.items(), key=lambda x: x[1], reverse=True)[:10]
 search_term = input('Enter Search term: ')
 matches = []
+search_concordance = v.concordance(search_term.lower())
 
 for doc_name, concordance in index.items():
-    relation = v.relation(v.concordance(search_term.lower()), concordance)
+    relation = v.relation(search_concordance, concordance)
     if relation != 0:
         #print(documents[i])
         #match = [doc_name.split('/')[-1] for doc_name, doc_content in word_content_dict.items() if doc_content == documents[i]]
