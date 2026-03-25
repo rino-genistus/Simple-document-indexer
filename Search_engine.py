@@ -9,7 +9,7 @@ stop_words.update('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm
 
 ALNUM_RE = re.compile(r'[^a-z0-9]+')
 
-base_dir = '/Users/rino/Downloads/'
+base_dir = '/Users/rino/Downloads/' #Set the Base Directory where you want to search for your files.
 
 items = listdir(base_dir)
 #print(items)
